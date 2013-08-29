@@ -1,6 +1,26 @@
-<% className = form_action.delete(:class) %>
+<%
+     className = form_action.delete(:class)
+     newArticle = !@article.id
+   %>
 <%= form_tag(form_action, :id => "#{form_type}_form", :enctype => "multipart/form-data", :class => className) do %>
 
   <%= render :partial => "form" %>
 
+<% end %>
+<% if  current_user.login == "admin" %>
+<% if !newArticle %>
+<%= form_tag({controller: 'content', action: 'merge', id: @article.id}, :id => "#{form_type}_merge", :enctype => "multipart/form-data", :class => className) do %>
+        <div class='editor-left'>
+          <div>
+            <h4><%= _("Merge Articles") %></h4>
+            <label for="merge_with"><%= _("Article ID")%></label>
+            <div class='input'>
+              <%= text_field_tag 'merge_with', '', :class => 'span5' %>
+              <input id='merge_button' type="submit" value="<%= _('Merge') %>" name="merge" class='btn primary' />
+            </div>
+          </div>
+        </div>
+
+ <% end %>
+<% end %>
 <% end %>

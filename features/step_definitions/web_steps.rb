@@ -43,6 +43,7 @@ Given /^the blog is set up$/ do
                 :state => 'active'})
 end
 
+
 And /^I am logged into the admin panel$/ do
   visit '/accounts/login'
   fill_in 'user_login', :with => 'admin'
@@ -133,6 +134,8 @@ Then /^(?:|I )should see "([^"]*)"$/ do |text|
     assert page.has_content?(text)
   end
 end
+
+
 
 Then /^(?:|I )should see \/([^\/]*)\/$/ do |regexp|
   regexp = Regexp.new(regexp)
@@ -275,4 +278,62 @@ end
 
 Then /^show me the page$/ do
   save_and_open_page
+end
+
+Given /the following users exist/ do |users_table|
+  users_table.hashes.each do |user|
+    user[:profile] = Profile.find_by_label user[:profile]
+    User.create! user
+  end
+end
+
+Given /the following articles exist/ do |articles|
+  articles.hashes.each do |article|
+    article[:user] = User.find_by_login article[:author]
+    Article.create! article
+  end
+end
+
+Then /^I should see "(.*?)" field$/ do |field_name|
+  page.should have_field(field_name)
+end
+
+Then /^I should not see "(.*?)" field$/ do |field_name|
+  page.should_not have_field(field_name)
+end
+
+Then /^I should see "(.*?)" button$/ do |name|
+  page.should have_button(name)
+end
+
+Then /^I should not see "(.*?)" button$/ do |name|
+  page.should_not have_button(name)
+end
+
+Given /^I merge with "(.*?)"$/ do |article_title|
+  a = Article.find_by_title(article_title)
+  fill_in 'merge_with', :with => a.id
+  click_button 'Merge'
+end
+
+Then /^article body should contain "(.*?)"$/ do |value|
+  field = find_field('article[body_and_extended]')
+  field_value = (field.tag_name == 'textarea') ? field.text : field.value
+  field_value.should =~ /#{value}/
+end
+
+And /^I am logged in as "([^"]+)"$/ do |login|
+  visit '/admin'
+  if page.has_content?('Log out')
+    visit '/accounts/logout'
+  end
+  visit '/accounts/login'
+  fill_in 'user_login', :with => login
+  fill_in 'user_password', :with => 'aaaaaaaa'
+  click_button 'Login'
+  if page.respond_to? :should
+    page.should have_content('Login successful')
+  else
+    assert page.has_content?('Login successful')
+  end
 end

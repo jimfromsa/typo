@@ -264,6 +264,19 @@ class Article < Content
                     :order => 'published_at desc')
   end
 
+  def merge_with(article_id)
+    raise(ArgumentError, "Merge failed. Unable to merge with itself!") if id == article_id
+    article = Article.find(article_id)
+    self.body = self.body + article.body
+    article.comments.each do |comment|
+      comment.article_id = self.id
+      comment.save
+    end
+    save
+    article.reload
+    article.destroy
+  end
+
   # Count articles on a certain date
   def self.count_by_date(year, month = nil, day = nil, limit = nil)
     if !year.blank?

@@ -240,4 +240,21 @@ class Admin::ContentController < Admin::BaseController
   def setup_resources
     @resources = Resource.by_created_at
   end
+
+  helper_method :allowed_to_merge?
+  def allowed_to_merge?
+    current_user.admin?
+  end
+
+  def merge
+    if allowed_to_merge?
+      @article = Article.find(params[:id])
+      @article.merge_with(params[:merge_with])
+      flash[:notice] = _('Successfully merged.')
+      flash.keep
+      redirect_to :action => 'edit', :id => params[:id]
+    else
+      raise "Error, you are not allowed to perform this action"
+    end
+  end
 end
