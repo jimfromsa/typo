@@ -7,7 +7,7 @@
   <%= render :partial => "form" %>
 
 <% end %>
-<% if  current_user.login == "admin" %>
+<% if current_user && current_user.admin? %>
 <% if !newArticle %>
 <%= form_tag({controller: 'content', action: 'merge', id: @article.id}, :id => "#{form_type}_merge", :enctype => "multipart/form-data", :class => className) do %>
         <div class='editor-left'>

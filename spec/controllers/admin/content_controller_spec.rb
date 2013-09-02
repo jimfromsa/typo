@@ -2,6 +2,8 @@
 
 describe Admin::ContentController do
   render_views
+  Factory(:blog)
+  @user = Factory(:user, :text_filter => Factory(:markdown), :profile => Factory(:profile_publisher))
 
   # Like it's a shared, need call everywhere
   shared_examples_for 'index action' do
@@ -183,8 +185,6 @@ describe Admin::ContentController do
   describe 'insert_editor action' do
 
     before do
-      Factory(:blog)
-      @user = Factory(:user, :profile => Factory(:profile_admin, :label => Profile::ADMIN))
       request.session = { :user => @user.id }
     end
 
@@ -466,10 +466,8 @@ describe Admin::ContentController do
   describe 'with admin connection' do
 
     before do
-      Factory(:blog)
       #TODO delete this after remove fixture
       Profile.delete_all
-      @user = Factory(:user, :text_filter => Factory(:markdown), :profile => Factory(:profile_admin, :label => Profile::ADMIN))
       @user.editor = 'simple'
       @user.save
       @article = Factory(:article)
@@ -612,8 +610,7 @@ describe Admin::ContentController do
   describe 'with publisher connection' do
 
     before :each do
-      Factory(:blog)
-      @user = Factory(:user, :text_filter => Factory(:markdown), :profile => Factory(:profile_publisher))
+
       @article = Factory(:article, :user => @user)
       request.session = {:user => @user.id}
     end
@@ -669,56 +666,6 @@ describe Admin::ContentController do
         end.should_not change(Article, :count)
       end
 
-    end
-  end
-
-  describe 'merge articles' do
-    describe 'with admin connection' do
-
-      before :each do
-        Factory(:blog)
-        @user = Factory(:user, :profile => Factory(:profile_admin, :label => Profile::ADMIN))
-        @article1 = Factory(:article, :user => @user, :body => 'article1_body',
-                            :title => 'article1_title')
-        @article2 = Factory(:article, :user => @user, :body => 'article2_body',
-                            :title => 'article2_title')
-        request.session = {:user => @user.id}
-      end
-
-      it 'should redirect to edit upon attempt to merge' do
-        post :merge, :id => @article1.id, :merge_with => @article2.id
-        response.should redirect_to :action => 'edit', :id => @article1.id
-      end
-
-      it 'should call merge_with method on article' do
-        Article.any_instance.should_receive(:merge_with).with(@article2.id)
-        post :merge, :id => @article1.id, :merge_with => @article2.id
-        response.should redirect_to :action => 'edit', :id => @article1.id
-      end
-
-      it 'should merge 2 articles' do
-        post :merge, :id => @article1.id, :merge_with => @article2.id
-        response.should redirect_to :action => 'edit', :id => @article1.id
-        @article1.reload
-        @article1.body.should include 'article1_body'
-        @article1.body.should include 'article2_body'
-      end
-    end
-
-    describe 'with publisher connection' do
-
-      before :each do
-        Factory(:blog)
-        @user = Factory(:user, :text_filter => Factory(:markdown), :profile => Factory(:profile_publisher))
-        @article = Factory(:article, :user => @user)
-        request.session = {:user => @user.id}
-      end
-
-      it 'should not suceed on attempt to merge' do
-        #post :merge, :id => @article.id, :merge_with => 1
-        #response.should_not be_success
-        pending
-      end
     end
   end
 end

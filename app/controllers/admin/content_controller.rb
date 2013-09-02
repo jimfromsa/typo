@@ -11,6 +11,20 @@ class Admin::ContentController < Admin::BaseController
     render :inline => "<%= raw auto_complete_result @items, 'name' %>"
   end
 
+  def merge
+    if @current_user.admin?
+      puts params[:current_article_id].to_i
+      puts (params[:merge_with])[:id].to_i
+      currentArticle = Article.find_by_id(params[:current_article_id].to_i)
+      articleToMergeWith = Article.find_by_id((params[:merge_with])[:id].to_i)
+
+      mergedArticle = currentArticle.merge_articles((params[:merge_with])[:id].to_i)
+      redirect_to :action => 'index'
+    else
+      flash[:error] = "You are not an admin"
+    end
+  end
+
   def index
     @search = params[:search] ? params[:search] : {}
     
@@ -239,22 +253,5 @@ class Admin::ContentController < Admin::BaseController
 
   def setup_resources
     @resources = Resource.by_created_at
-  end
-
-  helper_method :allowed_to_merge?
-  def allowed_to_merge?
-    current_user.admin?
-  end
-
-  def merge
-    if allowed_to_merge?
-      @article = Article.find(params[:id])
-      @article.merge_with(params[:merge_with])
-      flash[:notice] = _('Successfully merged.')
-      flash.keep
-      redirect_to :action => 'edit', :id => params[:id]
-    else
-      raise "Error, you are not allowed to perform this action"
-    end
   end
 end
