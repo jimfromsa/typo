@@ -25,12 +25,17 @@ class Admin::CategoriesController < Admin::BaseController
 
   def new_or_edit
     @categories = Category.find(:all)
-    @category = Category.find(params[:id])
+    @category = case params[:id]
+                  when nil
+                    Category.new
+                  else
+                    Category.find(params[:id])
+                end
     @category.attributes = params[:category]
     if request.post?
       respond_to do |format|
-        format.html { save_category }
-        format.js do 
+        format.html { save_a(@category, 'category') }
+        format.js do
           @category.save
           @article = Article.new
           @article.categories << @category
@@ -38,9 +43,12 @@ class Admin::CategoriesController < Admin::BaseController
         end
       end
       return
+    else
+      render 'new'
     end
-    render 'new'
   end
+
+
 
   def save_category
     if @category.save!

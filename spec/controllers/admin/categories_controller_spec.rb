@@ -4,6 +4,7 @@ describe Admin::CategoriesController do
   render_views
 
   before(:each) do
+    Blog.delete_all
     Factory(:blog)
     #TODO Delete after removing fixtures
     Profile.delete_all
