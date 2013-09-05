@@ -20,11 +20,17 @@ Feature: Merge Articles
   Scenario: Successfully create article
     Given I am logged in as "admin"
     And I am on the new category page
-    Then  I should see "Merge Articles"
+    Then  I should see "Categories"
     And I should see "Name" field
-    And I should see "Merge" button
-    When I fill in "Article ID" with "2"
-    And I press "merge_button"
+    And I should see "Keywords" field
+    And I should see "Description" field
+    And I should see "Permalink" field
+    And I should see "Save" button
+    When I fill in "Name" with "test"
+    And I fill in "Keywords" with "test"
+    And I fill in "Permalink" with "test"
+    And I fill in "Description" with "test"
+    And I press "Save"
     Then I should be on the article edit page for "Test Article 1"
     Then I should see "test Article one"
 
